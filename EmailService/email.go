@@ -1,0 +1,5 @@
+package EmailService;
+
+func SendEmail() {
+
+}
