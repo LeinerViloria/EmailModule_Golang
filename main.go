@@ -1,9 +1,11 @@
 package main
 
 import (
-	"net/http"
-
+	"log"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"os"
+	"github.com/joho/godotenv"
 )
 
 func setupRouter() *gin.Engine {
@@ -17,6 +19,13 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+
+	if err := godotenv.Load(); err != nil {
+        log.Fatalf("Error cargando el archivo .env: %v", err)
+    }
+
+	port := os.Getenv("PORT")
+
 	r := setupRouter()
-	r.Run(":8080")
+	r.Run(port)
 }
