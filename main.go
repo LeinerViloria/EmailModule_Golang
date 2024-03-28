@@ -15,6 +15,10 @@ func setupRouter() *gin.Engine {
 		c.String(http.StatusOK, "Email module is running")
 	})
 
+	// authorized := r.Group("/")
+
+	// authorized.Use(ValidateToken())
+
 	return r
 }
 
