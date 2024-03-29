@@ -1,15 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 )
+
+type User struct {
+	Rowid int
+	Email string
+}
 
 var SecretKey string
 
@@ -22,21 +29,24 @@ func setupRouter() *gin.Engine {
 		header := c.GetHeader("Authorization")
 
 		tokenString := strings.Split(header, " ")[1]
-		
+
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(SecretKey), nil
 		})
-		
+
 		if err != nil {
 			c.String(http.StatusUnauthorized, "Invalid credentials")
 			return
 		}
-		
+
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			user := claims["user"].(string)
-			fmt.Println(user)
-		}else
-		{
+			value := claims["user"].(string)
+
+			var data map[string]string
+			json.Unmarshal([]byte(value), &data)
+
+			fmt.Println(data["Email"])
+		} else {
 			c.String(http.StatusUnauthorized, "Invalid credentials")
 			return
 		}
@@ -46,6 +56,12 @@ func setupRouter() *gin.Engine {
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Email module is running")
+	})
+
+	r.POST("/SendMessage", func(c *gin.Context) {
+		var Items = c.Request.Body
+		fmt.Println(Items)
+		c.String(http.StatusOK, "Email sended")
 	})
 
 	return r
