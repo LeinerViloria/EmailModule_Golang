@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,11 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type User struct {
-	Rowid int
-	Email string
-}
-
+var UserEmail string
 var SecretKey string
 
 func setupRouter() *gin.Engine {
@@ -35,7 +30,8 @@ func setupRouter() *gin.Engine {
 		})
 
 		if err != nil {
-			c.String(http.StatusUnauthorized, "Invalid credentials")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			c.Abort()
 			return
 		}
 
@@ -45,9 +41,10 @@ func setupRouter() *gin.Engine {
 			var data map[string]string
 			json.Unmarshal([]byte(value), &data)
 
-			fmt.Println(data["Email"])
+			UserEmail = data["Email"]
 		} else {
-			c.String(http.StatusUnauthorized, "Invalid credentials")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			c.Abort()
 			return
 		}
 
@@ -59,8 +56,6 @@ func setupRouter() *gin.Engine {
 	})
 
 	r.POST("/SendMessage", func(c *gin.Context) {
-		var Items = c.Request.Body
-		fmt.Println(Items)
 		c.String(http.StatusOK, "Email sended")
 	})
 
