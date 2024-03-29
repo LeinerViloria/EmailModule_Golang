@@ -16,18 +16,15 @@ var SecretKey string
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 
-	// SecretKey := os.Getenv("SECRET_KEY")
+	SecretKey := os.Getenv("SECRET_KEY")
 
 	r.Use(func(c *gin.Context) {
-
-		fmt.Println("Middleware - ValidateToken")
-
 		header := c.GetHeader("Authorization")
 
 		tokenString := strings.Split(header, " ")[1]
 		
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return []byte("d1d37feb-0386-45a7-aba1-8aa284a2d23aD_S$24"), nil
+			return []byte(SecretKey), nil
 		})
 		
 		if err != nil {
