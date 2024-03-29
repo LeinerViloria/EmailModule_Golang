@@ -6,21 +6,39 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
+var SecretKey string
+
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 
+	SecretKey := os.Getenv("SECRET_KEY")
+
 	r.Use(func(c *gin.Context) {
+
+		fmt.Println("Middleware - ValidateToken")
 
 		header := c.GetHeader("Authorization")
 
-		parts := strings.Split(header, " ")
-		fmt.Println("Middleware - ValidateToken")
-		fmt.Println(parts[1])
+		tokenString := strings.Split(header, " ")[1]
+		
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(SecretKey), nil
+		})
+		
+		if err != nil {
+			c.AbortWithStatus(401)
+			return
+		}
+		
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			userID := claims["userID"].(string)
+			fmt.Println("User ID:", userID)
+		}
 
 		c.Next()
 	})
