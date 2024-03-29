@@ -16,7 +16,7 @@ var SecretKey string
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 
-	SecretKey := os.Getenv("SECRET_KEY")
+	// SecretKey := os.Getenv("SECRET_KEY")
 
 	r.Use(func(c *gin.Context) {
 
@@ -27,17 +27,21 @@ func setupRouter() *gin.Engine {
 		tokenString := strings.Split(header, " ")[1]
 		
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return []byte(SecretKey), nil
+			return []byte("d1d37feb-0386-45a7-aba1-8aa284a2d23aD_S$24"), nil
 		})
 		
 		if err != nil {
-			c.AbortWithStatus(401)
+			c.String(http.StatusUnauthorized, "Invalid credentials")
 			return
 		}
 		
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			userID := claims["userID"].(string)
-			fmt.Println("User ID:", userID)
+			user := claims["user"].(string)
+			fmt.Println(user)
+		}else
+		{
+			c.String(http.StatusUnauthorized, "Invalid credentials")
+			return
 		}
 
 		c.Next()
