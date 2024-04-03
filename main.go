@@ -2,7 +2,7 @@ package main
 
 import (
 	// "encoding/json"
-	"fmt"
+	// "fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	// "github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
-	"net/smtp"
+	"github.com/go-mail/mail"
 )
 
 var UserEmail string
@@ -62,23 +62,20 @@ func setupRouter() *gin.Engine {
 
 		from := "t84098030@gmail.com"
 
-		// Configuración del servidor SMTP
-		smtpHost := "smtp.gmail.com"
-		smtpPort := "587"
-		auth := smtp.PlainAuth("", from, "OtraPruebaCecar123", smtpHost)
+		m := mail.NewMessage()
 
-		// Mensaje de correo electrónico
-		message := []byte("Subject: Prueba de correo electrónico\r\n" +
-			"\r\n" +
-			"Este es un mensaje de prueba enviado desde Go.\r\n")
+		m.SetHeader("From", from)
+		m.SetHeader("To", "pokop58224@evimzo.com")
+		m.SetHeader("Subject", "Hello!")
 
-		to := []string{"pokop58224@evimzo.com"}
+		m.SetBody("text/html", "Hello <b>Kate</b> and <i>Noah</i>!")
 
-		// Envío del correo electrónico
-		err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
-		if err != nil {
-			fmt.Printf("Error al enviar el correo electrónico: %v", err)
-			return
+		d := mail.NewDialer("smtp.gmail.com", 465, from, "OtraPruebaCecar123")
+
+		if err := d.DialAndSend(m); err != nil {
+
+		panic(err)
+
 		}
 
 		c.String(http.StatusOK, "Email sended")
