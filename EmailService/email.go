@@ -1,5 +1,0 @@
-package EmailService;
-
-func SendEmail() {
-
-}

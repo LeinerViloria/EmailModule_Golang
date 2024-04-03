@@ -60,7 +60,8 @@ func setupRouter() *gin.Engine {
 
 	r.POST("/SendMessage", func(c *gin.Context) {
 
-		from := "t84098030@gmail.com"
+		from := os.Getenv("EMAIL")
+		pass := os.Getenv("EMAIL_PASS")
 
 		m := mail.NewMessage()
 
@@ -70,15 +71,15 @@ func setupRouter() *gin.Engine {
 
 		m.SetBody("text/html", "Hola")
 
-		d := mail.NewDialer("smtp.gmail.com", 587, from, "wbku myqg pnoy opdg")
+		d := mail.NewDialer("smtp.gmail.com", 587, from, pass)
 
 		if err := d.DialAndSend(m); err != nil {
 
-		panic(err)
+			panic(err)
 
 		}
 
-		c.String(http.StatusOK, "Email sended")
+		c.JSON(http.StatusOK, gin.H{"result": "Email sended"})
 	})
 
 	return r
