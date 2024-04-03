@@ -68,9 +68,9 @@ func setupRouter() *gin.Engine {
 		m.SetHeader("To", "pokop58224@evimzo.com")
 		m.SetHeader("Subject", "Hello!")
 
-		m.SetBody("text/html", "Hello <b>Kate</b> and <i>Noah</i>!")
+		m.SetBody("text/html", "Hola")
 
-		d := mail.NewDialer("smtp.gmail.com", 465, from, "OtraPruebaCecar123")
+		d := mail.NewDialer("smtp.gmail.com", 587, from, "wbku myqg pnoy opdg")
 
 		if err := d.DialAndSend(m); err != nil {
 
