@@ -1,18 +1,18 @@
 package main
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	// "fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
-	// "strings"
-	//"crypto/tls"
+	"strings"
 
 	"github.com/gin-gonic/gin"
-	// "github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"github.com/go-mail/mail"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 )
 
 var UserEmail string
@@ -21,35 +21,35 @@ var SecretKey string
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 
-	// SecretKey := os.Getenv("SECRET_KEY")
+	SecretKey := os.Getenv("SECRET_KEY")
 
 	r.Use(func(c *gin.Context) {
-		// header := c.GetHeader("Authorization")
+		header := c.GetHeader("Authorization")
 
-		// tokenString := strings.Split(header, " ")[1]
+		tokenString := strings.Split(header, " ")[1]
 
-		// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// 	return []byte(SecretKey), nil
-		// })
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(SecretKey), nil
+		})
 
-		// if err != nil {
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		// 	c.Abort()
-		// 	return
-		// }
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			c.Abort()
+			return
+		}
 
-		// if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		// 	value := claims["user"].(string)
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			value := claims["user"].(string)
 
-		// 	var data map[string]string
-		// 	json.Unmarshal([]byte(value), &data)
+			var data map[string]string
+			json.Unmarshal([]byte(value), &data)
 
-		// 	UserEmail = data["Email"]
-		// } else {
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		// 	c.Abort()
-		// 	return
-		// }
+			UserEmail = data["Email"]
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			c.Abort()
+			return
+		}
 
 		c.Next()
 	})
@@ -63,13 +63,23 @@ func setupRouter() *gin.Engine {
 		from := os.Getenv("EMAIL")
 		pass := os.Getenv("EMAIL_PASS")
 
+		body, err := io.ReadAll(c.Request.Body)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var data map[string]string
+		json.Unmarshal([]byte(string(body)), &data)
+
 		m := mail.NewMessage()
 
-		m.SetHeader("From", from)
-		m.SetHeader("To", "pokop58224@evimzo.com")
-		m.SetHeader("Subject", "Hello!")
+		m.SetHeader("From", UserEmail)
+		m.SetHeader("To", data["sendsTo"])
+		m.SetHeader("Subject", "Mensajeria - calendario")
 
-		m.SetBody("text/html", "Hola")
+		m.SetBody("text/html", data["message"])
 
 		d := mail.NewDialer("smtp.gmail.com", 587, from, pass)
 
