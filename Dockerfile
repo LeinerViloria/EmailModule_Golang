@@ -11,6 +11,7 @@ RUN go mod download
 
 # Copy the source code
 COPY *.go ./
+COPY .env ./
 
 # Build the application with optimizations
 RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
